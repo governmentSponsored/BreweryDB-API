@@ -27,6 +27,7 @@ function showPosition(position) {
 function getAddressFromLatLong(lat,long) {
     //php file that does api requests to avoid XSS
     let url = `apiRequest.php?latlong=${lat},${long}&service=gmap`;
+    console.log(url);
     return $.ajax({ 
         'url': url
     });
@@ -42,6 +43,7 @@ function getBreweryFromAddress(addressInfo) {
         }
     let url = `apiRequest.php?locality=${locality}&region=${region}&country=${country}`,
         dataString = '';
+    console.log(url);
     $.ajax({ 
         'url': url
     }).done(function(data) {
