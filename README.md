@@ -5,7 +5,9 @@ Example working API url for all breweries in Alexandria, VA: http://api.breweryd
 
 You just need to add a keys.php file with the following:
 
+```php
 <?php
 	$breweryKey = 'YOUR_BREWERYDB_KEY;
 	$mapsKey = 'YOUR_GOOGLE_API_KEY';
 ?>
+```
