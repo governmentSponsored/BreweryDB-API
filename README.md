@@ -7,7 +7,7 @@ You just need to add a keys.php file with the following:
 
 ```php
 <?php
-	$breweryKey = 'YOUR_BREWERYDB_KEY;
+	$breweryKey = 'YOUR_BREWERYDB_KEY';
 	$mapsKey = 'YOUR_GOOGLE_API_KEY';
 ?>
 ```
