@@ -1,0 +1,31 @@
+#spinner img{
+    margin: auto;
+    display: block;
+    max-width: 200px;
+}
+.hide {
+	display: none;
+}
+#addressForm {
+	text-align: center;
+}
+form {
+	display: inline-block;
+}
+form input#city, form select {
+	display: inline-block;
+    margin-bottom: 0;
+    font-weight: normal;
+    text-align: center;
+    border: 1px solid transparent;
+    padding: 10px 15px;
+    font-size: 15px;
+    line-height: 1.42857143;
+    border-radius: 4px;
+    border-width: 2px;
+    color: #1f1e1d;
+}
+option {
+	color: white;
+	background-color: #1f1e1d
+}
