@@ -3,10 +3,10 @@
 	header('Content-Type: application/json');
 	$service = $_GET['service'];
 	$latlong = $_GET['latlong'];
-	$locality = $_GET['locality'];
-	$region = $_GET['region'];
+	$locality = encodeURIComponent($_GET['locality']);
+	$region = encodeURIComponent($_GET['region']);
 	$country = $_GET['country'];
-	
+
 	if($service == 'gmap') {
 		if (!$latlong) { #if there is no lat or long info
 			echo 'sorry, no latlong';
@@ -25,4 +25,9 @@
 	
 	$JSON = file_get_contents($fullUrl);
 	echo $JSON;
+
+	function encodeURIComponent($str) {
+	    $revert = array('%21'=>'!', '%2A'=>'*', '%27'=>"'", '%28'=>'(', '%29'=>')');
+	    return strtr(rawurlencode($str), $revert);
+	}
 ?>
