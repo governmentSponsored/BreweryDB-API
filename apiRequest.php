@@ -6,6 +6,8 @@
 	$locality = encodeURIComponent($_GET['locality']);
 	$region = encodeURIComponent($_GET['region']);
 	$country = $_GET['country'];
+	$destinations = $_GET['destinations'];
+	$origins = $_GET['origins'];
 
 	if($service == 'gmap') {
 		if (!$latlong) { #if there is no lat or long info
@@ -14,6 +16,8 @@
 		} else {
 			$fullUrl = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $latlong . '&key=' . $mapsKey;
 		}		
+	} else if($service == 'distance') {
+		$fullUrl = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=' . $origins . '&destinations=' . $destinations . '&key=' . $mapsKey;
 	} else {
 		if(!$locality || !$region || !$country) {#if one of the location pieces of data is missing
 			echo 'no locality or region or country';
