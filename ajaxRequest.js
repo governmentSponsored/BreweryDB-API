@@ -53,6 +53,7 @@ function getGeoLocation() {
 
 //get the lat/long from geolocation
 function showPosition(position) {
+    //console.log(position);
     var lat = position.coords.latitude,
         long = position.coords.longitude;
     getAddressFromLatLong(lat,long).then(getBreweryFromAddress);
@@ -62,67 +63,118 @@ function showPosition(position) {
 function getAddressFromLatLong(lat,long) {
     //php file that does api requests to avoid XSS
     var url = `apiRequest.php?latlong=${lat},${long}&service=gmap`;
-    console.log(url);
+    
     return $.ajax({ 
         'url': url
     });
 }
 
 function getBreweryFromAddress(addressInfo) {
-    var address, locality, region, country;
+    var address, locality, region, country, originLatLong;
+    //console.log(addressInfo);
     if(addressInfo.status === "OK") {
-            address = addressInfo.results[0].address_components;
-            locality = address[3].short_name;
-            region = address[4].long_name;
-            country = address[5].short_name;
-            console.log(locality,region,country);
+        address = addressInfo.results[0].address_components;
+        locality = address[3].short_name;
+        region = address[4].long_name;
+        country = address[5].short_name;
+        originLatLong = addressInfo.results[0].geometry.location.lat + ',' +  addressInfo.results[0].geometry.location.lng;
     } else {
         locality = addressInfo.locality;
         region = addressInfo.state;
         country = addressInfo.country;
+        originLatLong = {
+            locality, region, country
+        }
     }
     locality = encodeURIComponent(locality);
     region = encodeURIComponent(region);
 
     var url = `apiRequest.php?locality=${locality}&region=${region}&country=${country}`;
-    console.log(url);
+    //console.log(url);
     $.ajax({ 
         'url': url
     }).done(function(data) {
-        drawTable(data.data);
+        drawTable(data.data, originLatLong);
     });
 }
 
-function drawTable(data) {
+function drawTable(data,origin) {
      $("#localBreweries").empty();
+     var destination = '',
+        current,
+        latlong,
+        ids = [];
     for (var i = 0; i < data.length; i++) {
-        showBreweries(data[i]);
+        current = data[i];
+        destination += current.latitude + ',' + current.longitude + '|';
+        ids.push(current.breweryId);
+        showBreweries(current);
     }
-    hideElement($("#spinner"));
+    getDistance(origin,destination,ids);
 }
 
 function showBreweries(b) {
-    console.log(b);
-    //deal with undefined stuff (hopefully)
+    // console.log(b);
+    //deal with undefined stuff
     var brewery = {
             name: b.brewery.name,
+            id: b.breweryId,
             site: "http://www.getsomebeer.com",
-            icon: 'images/beer.png'
+            icon: 'images/beer.png',
+            address: 'no street address listed'
         };
     if(b.website) { brewery.site = b.website;}
     if(b.brewery.images) {brewery.icon = b.brewery.images.icon;}
+    if(b.streetAddress) { brewery.address = b.streetAddress}
     
     var panelDiv = $("<div class='media panel panel-default'/>");
     $("#localBreweries").append(panelDiv);
 
-    var panelDivHeading = $(`<div class='panel-heading'><a href='${brewery.site}'>${brewery.name}</a></div>`),
-        panelDivBody = $(`<div class='panel-body'></div>`),
+    var panelDivHeading = $(`<div id='${brewery.id}' class='panel-heading'><a href='${brewery.site}'>${brewery.name}</a></div>`),
+        panelDivBody = $(`<div class='panel-body'>${brewery.address}</div>`),
         image = $(`<img height='50px' src='${brewery.icon}' />`);
 
     panelDiv.append(panelDivHeading, [panelDivBody]);
-    panelDivBody.append(image);
+    panelDivBody.prepend(image);
 }
 
-function getDistance(origin,destination) {
-    var url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=AIzaSyBEe0yXQqhIi3w805Bb-l9oV-_vfgLz8PQ`
+function getDistance(o,d,ids) { //origin lat & long, destination lat & long
+    // console.log(o,d,ids);
+    var url = `apiRequest.php?service=distance&origins=${o}&destinations=${d}`,
+        currentItem,
+        span;
+    $.ajax({ 
+        'url': url
+    }).done(function(data) {
+        var distances = data.rows[0].elements;
+
+        for(var a=0; a<distances.length; a++) {
+            currentItem = distances[a].distance;
+            span = $('<span class="distance pull-right"/>');
+            span.append(currentItem.text)
+                .data("sort", currentItem.value);
+            $('#' + ids[a]).append(span);
+        }
+        sortDistances();
+    });
+}
+
+function sortDistances() {
+    var $breweries = $("#localBreweries"),
+        $breweryDiv = $breweries.children('div.panel-default');
+    $breweryDiv.sort(function(a,b) {
+        var aVal = $(a).find('.distance').data('sort'),
+            bVal = $(b).find('.distance').data('sort');
+
+        if(aVal > bVal) {
+            return 1;
+        }
+        if(aVal < bVal) { 
+            return -1
+        }
+
+        return 0;
+    });
+    $breweryDiv.detach().appendTo($breweries);
+    hideElement($("#spinner"));
 }
