@@ -146,9 +146,9 @@ function showBreweries(b) {
     var panelDivHeading = $(`<div id='${brewery.id}' class='panel-heading'><a href='${brewery.site}'>${brewery.name}</a></div>`),
         panelDivBody = $(`
             <div class='panel-body'>
-                <a href='${brewery.href}'>${brewery.address}</a>
-                <button data-brewery="${brewery.id}" class="btn btn-default pull-right see-beers">See Beers</button>
-                <ul class="beer-list"></ul>
+                <a href='${brewery.href}'>${brewery.address}</a><br />
+                <button data-brewery="${brewery.id}" class="btn btn-default see-beers">See Beers</button>
+                <ul class="beer-list list-group"></ul>
             </div>`),
         image = $(`<img height='50px' src='${brewery.icon}' />`);
 
@@ -198,7 +198,6 @@ function sortDistances() {
 }
 
 function getbeers(e) {
-    
     var $this = $(this),
         $beerList = $this.next();
         id = $this[0].getAttribute('data-brewery'),
@@ -207,24 +206,47 @@ function getbeers(e) {
     //clear out the list in case it already has data
     $beerList.empty();
 
-    $.ajax({ 
-        'url': url
-    }).done(function(data) {
-        if(data.message == 'Request Successful') {
-            var beers = data.data,
-            current;
-            for(var i=0; i<beers.length; i++) {
-                current = beers[i];
+    //show with ajax req and hide
+    if($this.text() == 'Hide Beers') {
+        $this.text('See Beers');
+        $beerList.hide();
+    } else {
+        //hopefully people don't keep clicking
+        $this.text('Please wait...');
+        $beerList.show();
+        //do ajax request
+        $.ajax({ 
+            'url': url
+        }).done(function(data) {
+            //make sure request went through and it has results
+            if(data.message == 'Request Successful' && data.data) {
+                var beers = data.data,
+                current;
+                for(var i=0; i<beers.length; i++) {
+                    current = beers[i];
+                    if(!current.abv) {current.abv = '???' }
+                    $beerList.append(
+                        $(`
+                        <li class="list-group-item">
+                            <p>${current.nameDisplay} (${current.style.shortName})</p>
+                            <p>${current.abv} ABV</p>
+                        </li>
+                        `)
+                    )
+                }
+            //show user that results aren't available
+            } else {
                 $beerList.append(
-                    $(`
-                    <li>
-                        ${current.nameDisplay}
-                    </li>
-                    `)
-                )
+                        $(`
+                        <li class="list-group-item">
+                            No beers, sorry bruh :/
+                        </li>
+                        `)
+                    )
             }
-        } else {
-            console.log('whoops');
-        }
-    });
+        });
+        
+        //after ajax is done, change button name
+        $this.text('Hide Beers');
+    }
 }
