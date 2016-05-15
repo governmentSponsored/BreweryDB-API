@@ -1,8 +1,6 @@
 # BreweryDB-API
 
-Testing out the [BreweryDB API](http://www.brewerydb.com/developers)
-
-Example working API url for all breweries in Alexandria, VA: http://api.brewerydb.com/v2/locations?locality=Alexandria&region=Virginia&countryIsoCode=us&key=YOUR_KEY
+Using the [BreweryDB API](http://www.brewerydb.com/developers), [Google Map API](https://www.google.com/work/mapsearth/products/mapsapi.html), and [Google Maps Distance Matrix API](https://developers.google.com/maps/documentation/distance-matrix/)
 
 You just need to add a **keys.php** file with the following:
 
