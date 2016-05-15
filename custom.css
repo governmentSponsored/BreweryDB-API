@@ -29,3 +29,7 @@ option {
 	color: white;
 	background-color: #1f1e1d
 }
+
+.panel-body img {
+    margin-right: 3px;
+}

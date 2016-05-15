@@ -1,11 +1,20 @@
 $(document).ready( function() {
+    //attempt to fix iOS clicking
     $("#geolocation, #addressLocation").css('cursor','pointer');
 
     //kick off geolocation process
-    $('#geolocation').click(function(event) {
+    function nearMe() {
         getGeoLocation();
         showElement($("#spinner"));
         hideElement($("#addressForm"));
+    }
+
+    //launch beer search on load
+    nearMe();
+
+    //near me button
+    $('#geolocation').click(function(event) {
+        nearMe();
     });
 
     //show form
@@ -13,6 +22,7 @@ $(document).ready( function() {
         $("#addressForm").toggle();
     });
     
+    //Near an address button
     $('#addressSubmit').click(function (event) {
         var locality = $("#city").val();
         var state = $("#state option:selected").text();
@@ -110,6 +120,7 @@ function drawTable(data,origin) {
         ids.push(current.breweryId);
         showBreweries(current);
     }
+    $('button.see-beers').bind('click', getbeers);
     getDistance(origin,destination,ids);
 }
 
@@ -119,19 +130,26 @@ function showBreweries(b) {
     var brewery = {
             name: b.brewery.name,
             id: b.breweryId,
-            site: "http://www.getsomebeer.com",
+            site: "#no-website",
             icon: 'images/beer.png',
-            address: 'no street address listed'
+            address: 'no street address listed',
+            href: '#'
         };
     if(b.website) { brewery.site = b.website;}
-    if(b.brewery.images) {brewery.icon = b.brewery.images.icon;}
-    if(b.streetAddress) { brewery.address = b.streetAddress}
+    if(b.brewery.images) { brewery.icon = b.brewery.images.icon; }
+    if(b.streetAddress) { brewery.address = b.streetAddress, brewery.href = 'http://maps.google.com/?daddr=' + b.streetAddress; }
     
+    //create divs and add data to them
     var panelDiv = $("<div class='media panel panel-default'/>");
     $("#localBreweries").append(panelDiv);
 
     var panelDivHeading = $(`<div id='${brewery.id}' class='panel-heading'><a href='${brewery.site}'>${brewery.name}</a></div>`),
-        panelDivBody = $(`<div class='panel-body'>${brewery.address}</div>`),
+        panelDivBody = $(`
+            <div class='panel-body'>
+                <a href='${brewery.href}'>${brewery.address}</a>
+                <button data-brewery="${brewery.id}" class="btn btn-default pull-right see-beers">See Beers</button>
+                <ul class="beer-list"></ul>
+            </div>`),
         image = $(`<img height='50px' src='${brewery.icon}' />`);
 
     panelDiv.append(panelDivHeading, [panelDivBody]);
@@ -177,4 +195,36 @@ function sortDistances() {
     });
     $breweryDiv.detach().appendTo($breweries);
     hideElement($("#spinner"));
+}
+
+function getbeers(e) {
+    
+    var $this = $(this),
+        $beerList = $this.next();
+        id = $this[0].getAttribute('data-brewery'),
+        url = `apiRequest.php?breweryId=${id}&service=beers`;
+
+    //clear out the list in case it already has data
+    $beerList.empty();
+
+    $.ajax({ 
+        'url': url
+    }).done(function(data) {
+        if(data.message == 'Request Successful') {
+            var beers = data.data,
+            current;
+            for(var i=0; i<beers.length; i++) {
+                current = beers[i];
+                $beerList.append(
+                    $(`
+                    <li>
+                        ${current.nameDisplay}
+                    </li>
+                    `)
+                )
+            }
+        } else {
+            console.log('whoops');
+        }
+    });
 }
