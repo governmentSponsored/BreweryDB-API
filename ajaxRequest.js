@@ -147,7 +147,7 @@ function showBreweries(b) {
         panelDivBody = $(`
             <div class='panel-body'>
                 <a href='${brewery.href}'>${brewery.address}</a><br />
-                <button data-brewery="${brewery.id}" class="btn btn-default see-beers">See Beers</button>
+                <button data-brewery="${brewery.id}" class="btn btn-success see-beers">See Beers</button>
                 <ul class="beer-list list-group"></ul>
             </div>`),
         image = $(`<img height='50px' src='${brewery.icon}' />`);
@@ -208,11 +208,15 @@ function getbeers(e) {
 
     //show with ajax req and hide
     if($this.text() == 'Hide Beers') {
-        $this.text('See Beers');
+        $this.text('See Beers')
+            .addClass('btn-success')
+            .removeClass('btn-info btn-danger');
         $beerList.hide();
     } else {
         //hopefully people don't keep clicking
-        $this.text('Please wait...');
+        $this.text('Please wait...')
+            .addClass('btn-info')
+            .removeClass('btn-success btn-danger');
         $beerList.show();
         //do ajax request
         $.ajax({ 
@@ -247,6 +251,8 @@ function getbeers(e) {
         });
         
         //after ajax is done, change button name
-        $this.text('Hide Beers');
+        $this.text('Hide Beers')
+            .addClass('btn-danger')
+            .removeClass('btn-info btn-success');;
     }
 }
