@@ -42,6 +42,22 @@ $(document).ready( function() {
     $.ajaxSetup({
       dataType: "json"
     });
+    $(document).on('click','.showScore',function(){
+        $this = $(this);
+        $this.text('Loading...')
+        var name = encodeURI($this[0].getAttribute('data-beerName'));
+        console.log(name);
+        //doing this one click at a time because I don't want to piss off Beer Advocate :X
+        $.ajax({ 
+            'url': 'apiRequest.php?service=score&beerName=' + name
+        }).done(function(data) {
+            var score = data[0];
+            $this.next().text(score);
+            $this.text('Done!');
+            console.log(score);
+
+        });
+    });
 });
 
 function showElement(elem) {
@@ -234,6 +250,10 @@ function getbeers(e) {
                         <li class="list-group-item">
                             <p>${current.nameDisplay} (${current.style.shortName})</p>
                             <p>${current.abv} ABV</p>
+                            <p>
+                                <button data-beerName="${current.nameDisplay}" class="showScore btn btn-success">See Score</button>
+                                <span class="score"></span>
+                            </p>
                         </li>
                         `)
                     )
@@ -243,7 +263,7 @@ function getbeers(e) {
                 $beerList.append(
                         $(`
                         <li class="list-group-item">
-                            No beers, sorry bruh :/
+                            No beers, sorry my thirsty friend :/
                         </li>
                         `)
                     )
@@ -253,6 +273,6 @@ function getbeers(e) {
         //after ajax is done, change button name
         $this.text('Hide Beers')
             .addClass('btn-danger')
-            .removeClass('btn-info btn-success');;
+            .removeClass('btn-info btn-success');
     }
 }

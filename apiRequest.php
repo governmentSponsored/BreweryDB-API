@@ -9,6 +9,7 @@
 	$destinations = $_GET['destinations'];
 	$origins = $_GET['origins'];
 	$breweryId = $_GET['breweryId'];
+	$beerName = $_GET['beerName'];
 
 	if($service == 'gmap') {
 		if (!$latlong) { #if there is no lat or long info
@@ -21,6 +22,8 @@
 		$fullUrl = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=' . $origins . '&destinations=' . $destinations . '&key=' . $mapsKey;
 	} else if($service == 'beers') {
 		$fullUrl = 'http://api.brewerydb.com/v2/brewery/' . $breweryId . '/beers?key=' . $breweryKey;
+	} else if($service == 'score') {
+		$fullUrl = $serverScorePHPFileLocation . '?beer=' . $beerName;
 	} else {
 		if(!$locality || !$region || !$country) {#if one of the location pieces of data is missing
 			echo 'no locality or region or country';
