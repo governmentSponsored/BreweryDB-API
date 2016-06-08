@@ -20,7 +20,7 @@
 			echo 'no lat or long';
 			return;
 		} else {
-			$fullUrl = 'http://api.brewerydb.com/v2/search/geo/point?lat=' . $lat . '&lng=' . $lng . '&key=' . $breweryKey;
+			$fullUrl = 'http://api.brewerydb.com/v2/search/geo/point?radius=25&lat=' . $lat . '&lng=' . $lng . '&key=' . $breweryKey;
 		}		
 	}	
 	
