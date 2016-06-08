@@ -2,34 +2,25 @@
 	include("keys.php");
 	header('Content-Type: application/json');
 	$service = $_GET['service'];
-	$latlong = $_GET['latlong'];
-	$locality = encodeURIComponent($_GET['locality']);
-	$region = encodeURIComponent($_GET['region']);
-	$country = $_GET['country'];
+	$lat = $_GET['lat'];
+	$lng = $_GET['lng'];
 	$destinations = $_GET['destinations'];
 	$origins = $_GET['origins'];
 	$breweryId = $_GET['breweryId'];
 	$beerName = $_GET['beerName'];
 
-	if($service == 'gmap') {
-		if (!$latlong) { #if there is no lat or long info
-			echo 'sorry, no latlong';
-			return;
-		} else {
-			$fullUrl = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $latlong . '&key=' . $mapsKey;
-		}		
-	} else if($service == 'distance') {
+	if($service == 'distance') {
 		$fullUrl = 'https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=' . $origins . '&destinations=' . $destinations . '&key=' . $mapsKey;
 	} else if($service == 'beers') {
 		$fullUrl = 'http://api.brewerydb.com/v2/brewery/' . $breweryId . '/beers?key=' . $breweryKey;
 	} else if($service == 'score') {
 		$fullUrl = $serverScorePHPFileLocation . '?beer=' . $beerName;
 	} else {
-		if(!$locality || !$region || !$country) {#if one of the location pieces of data is missing
-			echo 'no locality or region or country';
+		if(!$lat || !$lng) {#if lat or long is missing
+			echo 'no lat or long';
 			return;
 		} else {
-			$fullUrl = 'http://api.brewerydb.com/v2/locations?isClosed=N&locality=' . $locality . '&region=' . $region . '&countryIsoCode=' . $country . '&key=' . $breweryKey;
+			$fullUrl = 'http://api.brewerydb.com/v2/search/geo/point?lat=' . $lat . '&lng=' . $lng . '&key=' . $breweryKey;
 		}		
 	}	
 	

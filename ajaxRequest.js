@@ -33,7 +33,7 @@ $(document).ready( function() {
             country: "us"
         };
         console.log(addressObj);
-        getBreweryFromAddress(addressObj);
+        getBreweryFromLatLong(addressObj);
         showElement($("#spinner"));
         hideElement($("#addressForm"));
     });
@@ -73,49 +73,23 @@ function getGeoLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(showPosition);
     } else {
-        return'Guess you gotta enter an address, bummer.';
+        return 'Guess you gotta enter an address, bummer.';
     }
 }
 
 //get the lat/long from geolocation
 function showPosition(position) {
-    //console.log(position);
+    console.log(position);
     var lat = position.coords.latitude,
         long = position.coords.longitude;
-    getAddressFromLatLong(lat,long).then(getBreweryFromAddress);
+    getBreweryFromLatLong(lat,long);
 }
 
-//get all the info brewerydb needs from gmaps
-function getAddressFromLatLong(lat,long) {
-    //php file that does api requests to avoid XSS
-    var url = `apiRequest.php?latlong=${lat},${long}&service=gmap`;
-    
-    return $.ajax({ 
-        'url': url
-    });
-}
-
-function getBreweryFromAddress(addressInfo) {
-    var address, locality, region, country, originLatLong;
+function getBreweryFromLatLong(lat,lng) {
     //console.log(addressInfo);
-    if(addressInfo.status === "OK") {
-        address = addressInfo.results[0].address_components;
-        locality = address[3].short_name;
-        region = address[4].long_name;
-        country = address[5].short_name;
-        originLatLong = addressInfo.results[0].geometry.location.lat + ',' +  addressInfo.results[0].geometry.location.lng;
-    } else {
-        locality = addressInfo.locality;
-        region = addressInfo.state;
-        country = addressInfo.country;
-        originLatLong = {
-            locality, region, country
-        }
-    }
-    locality = encodeURIComponent(locality);
-    region = encodeURIComponent(region);
+    var originLatLong = lat + ',' + lng,
+        url = `apiRequest.php?lat=${lat}&lng=${lng}`;
 
-    var url = `apiRequest.php?locality=${locality}&region=${region}&country=${country}`;
     //console.log(url);
     $.ajax({ 
         'url': url
@@ -128,12 +102,11 @@ function drawTable(data,origin) {
      $("#localBreweries").empty();
      var destination = '',
         current,
-        latlong,
         ids = [];
     for (var i = 0; i < data.length; i++) {
         current = data[i];
         destination += current.latitude + ',' + current.longitude + '|';
-        ids.push(current.breweryId);
+        ids.push(current.id);
         showBreweries(current);
     }
     $('button.see-beers').bind('click', getbeers);
@@ -141,11 +114,11 @@ function drawTable(data,origin) {
 }
 
 function showBreweries(b) {
-    // console.log(b);
+    console.log(b);
     //deal with undefined stuff
     var brewery = {
             name: b.brewery.name,
-            id: b.breweryId,
+            id: b.id,
             site: "#no-website",
             icon: 'images/beer.png',
             address: 'no street address listed',
