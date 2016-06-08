@@ -86,11 +86,11 @@ function showPosition(position) {
 }
 
 function getBreweryFromLatLong(lat,lng) {
-    //console.log(addressInfo);
+    // lat = 35.1495
+    // lng = 90.0490
     var originLatLong = lat + ',' + lng,
         url = `apiRequest.php?lat=${lat}&lng=${lng}`;
 
-    //console.log(url);
     $.ajax({ 
         'url': url
     }).done(function(data) {
@@ -103,14 +103,19 @@ function drawTable(data,origin) {
      var destination = '',
         current,
         ids = [];
-    for (var i = 0; i < data.length; i++) {
-        current = data[i];
-        destination += current.latitude + ',' + current.longitude + '|';
-        ids.push(current.id);
-        showBreweries(current);
+    if(typeof data == 'undefined') {
+        $("#localBreweries").append('<p>Sorry, no breweries near you :/</p>');
+        hideElement($("#spinner"));
+    } else {
+        for (var i = 0; i < data.length; i++) {
+            current = data[i];
+            destination += current.latitude + ',' + current.longitude + '|';
+            ids.push(current.id);
+            showBreweries(current);
+        }
+        $('button.see-beers').bind('click', getbeers);
+        getDistance(origin,destination,ids);
     }
-    $('button.see-beers').bind('click', getbeers);
-    getDistance(origin,destination,ids);
 }
 
 function showBreweries(b) {
